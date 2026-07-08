@@ -1,5 +1,18 @@
 import pygame
 
+class Bullet():
+  def __init__(self, x, y, img):
+    self.img = img
+    self.speed = 10
+    self.rect = self.img.get_rect()
+    self.rect.center = (x, y)
+  
+  def update(self):
+    self.rect.y -= self.speed
+  
+  def draw(self, screen):
+    screen.blit(self.img, self.rect)
+  
 class Player():
   def __init__(self, x, y):
     self.speed = 14
@@ -10,7 +23,6 @@ class Player():
     self.space_ship_rect.center = (x, y)
     
   def draw(self, screen):
-    screen.fill((0,0,0))
     screen.blit(self.space_ship, self.space_ship_rect)
     
   def move(self, right, left, up, down):
@@ -43,6 +55,11 @@ class Player():
     self.space_ship_rect.x += dx 
     self.space_ship_rect.y += dy
   
-  def attack(self, fire):
+  def attack(self, screen, fire):
+    bullet_img = pygame.image.load('images/laser.png').convert_alpha()
+    bullet_rect = bullet_img.get_rect()
+    bullet_rect.center = (self.space_ship_rect.x, self.space_ship_rect.y) 
     if fire:
-      pass 
+      return Bullet(self.space_ship_rect.centerx, self.space_ship_rect.top, bullet_img)
+    return None 
+
