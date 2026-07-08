@@ -61,5 +61,21 @@ class Player():
     bullet_rect.center = (self.space_ship_rect.x, self.space_ship_rect.y) 
     if fire:
       return Bullet(self.space_ship_rect.centerx, self.space_ship_rect.top, bullet_img)
-    return None 
+    return None
+
+import random
+
+class Meteor():
+  def __init__(self):
+    self.speed = random.randint(2, 5)
+    self.meteor_img = pygame.image.load("images/meteor.png").convert_alpha()
+    self.rect = self.meteor_img.get_rect()
+    self.rect.x = random.randint(0, 1280)
+    self.rect.y = -50
+  
+  def update(self):
+    self.rect.y += self.speed
+  
+  def draw(self, screen):
+    screen.blit(self.meteor_img, self.rect)
 

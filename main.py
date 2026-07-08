@@ -4,6 +4,7 @@ import player
 
 
 pygame.init()
+pygame.mixer.init()
 
 WIDTH = 1280
 HEIGHT = 720
@@ -31,6 +32,7 @@ def drawing_stars():
 
 def main():
   run = True
+  game_over = False
   
   right = False
   left = False
@@ -39,12 +41,32 @@ def main():
   fire = False
   
   bullets = []
+  meteors = []
+  score = 0
+  meteor_spawn_timer = 0
+  
+  font = pygame.font.Font(None, 36)
+  
+  try:
+    pygame.mixer.music.load("audio/game_music.wav")
+    pygame.mixer.music.play(-1)
+    laser_sound = pygame.mixer.Sound("audio/laser.wav")
+    explosion_sound = pygame.mixer.Sound("audio/explosion.wav")
+    damage_sound = pygame.mixer.Sound("audio/damage.ogg")
+  except:
+    laser_sound = explosion_sound = damage_sound = None
   
   while run:
     screen.fill((0,0,0))
     clock.tick(FPS)
     
     drawing_stars()
+    
+    if not game_over:
+      meteor_spawn_timer += 1
+      if meteor_spawn_timer > 30:
+        meteors.append(player.Meteor())
+        meteor_spawn_timer = 0
     
     for event in pygame.event.get():
       if event.type == pygame.QUIT:
@@ -61,9 +83,11 @@ def main():
           up = True
         if event.key == pygame.K_s:
           down = True
-        if event.key == pygame.K_SPACE:
+        if event.key == pygame.K_SPACE and not game_over:
           new_bullet = ship.attack(screen, fire=True)
           if new_bullet:
+            if laser_sound:
+              laser_sound.play()
             bullets.append(new_bullet)
       
       if event.type == pygame.KEYUP:
@@ -75,19 +99,49 @@ def main():
           up = False
         if event.key == pygame.K_s:
           down = False
-      
-    for bullet in bullets[:]:
-      bullet.update()
-      bullet.draw(screen)
-      
-      if bullet.rect.bottom == 0:
-        bullets.remove(bullet)
     
-    ship.draw(screen)
-    ship.move(right, left, up, down) 
-    ship.attack(screen, fire)
+    if not game_over:
+      for bullet in bullets[:]:
+        bullet.update()
+        bullet.draw(screen)
+        
+        if bullet.rect.bottom == 0:
+          bullets.remove(bullet)
+        
+        for meteor in meteors[:]:
+          if bullet.rect.colliderect(meteor.rect):
+            bullets.remove(bullet)
+            meteors.remove(meteor)
+            if explosion_sound:
+              explosion_sound.play()
+            score += 10
+            break
+      
+      for meteor in meteors[:]:
+        meteor.update()
+        meteor.draw(screen)
+        
+        if meteor.rect.top > 720:
+          meteors.remove(meteor)
+        
+        if ship.space_ship_rect.colliderect(meteor.rect):
+          if damage_sound:
+            damage_sound.play()
+          game_over = True
+      
+      ship.draw(screen)
+      ship.move(right, left, up, down) 
+    
+    score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    
+    if game_over:
+      game_over_text = font.render("GAME OVER - ESC to Exit", True, (255, 0, 0))
+      screen.blit(game_over_text, (400, 350))
+    
     pygame.display.update() 
   pygame.quit()
+
 
 if __name__ == "__main__":
   main()
