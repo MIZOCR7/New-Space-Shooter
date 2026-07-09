@@ -4,7 +4,7 @@ A simple 2D Space Ship game built with Python and Pygame. It is a game which U s
 
 ## Controls
 
-### Player 1 (Ninja):
+### Space Ship:
 * **FORWARD:** `W` 
 * **BACKWARD:** `S`
 * **RIGHT** `D`
